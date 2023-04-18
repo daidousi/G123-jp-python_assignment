@@ -1,0 +1,6 @@
+flask
+pandas
+numpy
+requests
+sqlite3
+datetime
