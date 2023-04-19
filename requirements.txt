@@ -4,3 +4,5 @@ numpy
 requests
 sqlite3
 datetime
+cryptography
+os

@@ -1,3 +1,19 @@
+#######################################################################################################################################################
+# Description : 
+#     This program will process below action :
+#         1. Get API Key from encrypted key files.
+#         2. Open local database, create the database if it doesn't exist.
+#         3. Check table in database, create the table if it doesn't exist.
+#         4. Do house keeping to delete the old data from table. 2 weeks is the limitation.
+#         5. Get the financial data of two given stocks (IBM, Apple Inc.) by AlphaVantage free API.
+#         6. Insert the most recently two weeks financial data to database. 
+#
+# Remark : 
+#     Please call "python encryptAPIKEY.py" once to create the encrypted key files before the first time using this program.
+#     This program can be put into the crontab to auto process everyday to update the data in database. 
+#######################################################################################################################################################
+
+
 # CSV data process
 import pandas as pd
 # Get data from url
@@ -7,6 +23,10 @@ import datetime
 # SQL function
 import sqlite3 as sql
 from sqlite3 import Error
+# Decrypt the AlphaVantage API KEY
+import decryptAPIKEY as decrypt
+# File operation
+import os
 
 
 # This functoin is used to connect to a database
@@ -95,8 +115,13 @@ def get_financial_data(symbol, apikey):
 #         symbol - stocks name, available value are IBM and AAPL
 #         date   - expired date
 def fill_financial_data(con, cur, symbol, date):
-    # Read data from csv file
-    financial_data = pd.read_csv('financial_data_%s.csv' % (symbol))
+    if os.path.exists('financial_data_%s.csv' % (symbol)):
+        # Read data from csv file
+        financial_data = pd.read_csv('financial_data_%s.csv' % (symbol))
+        os.remove('financial_data_%s.csv' % (symbol))
+    else:
+        print('Error : File financial_data_%s.csv doesn\'t exist\nNo data to be inserted into db' % (symbol))
+        return
     # Get the line count
     nrows = financial_data.shape[0]
     # Do nothing if line less than 1
@@ -126,6 +151,11 @@ def fill_financial_data(con, cur, symbol, date):
 
 # This function is the main function
 def main():
+    # Get the API Key
+    my_apikey = decrypt.main()
+    if my_apikey is None:
+        print('Error : The API Key file does not exist.\nPlease execute "\033[91mpython encryptAPIKEY.py\033[0m" to create the API Key file before running this program.')
+        return
     # Get today date and expired date, the expired date is two week
     today = datetime.date.today()
     two_weeks_ago = today - datetime.timedelta(days=14)
@@ -140,11 +170,9 @@ def main():
             create_table(connection, cursor)
         # Delete the expired data if existed
         house_keeping(connection, cursor, two_weeks_ago)
-        # Get the api key for using the free API
-        apikey = input("Please enter your AlphaVantage API Key : ")
         # Get the data from url to local csv
-        get_financial_data("IBM", apikey)
-        get_financial_data("AAPL", apikey)
+        get_financial_data("IBM", my_apikey)
+        get_financial_data("AAPL", my_apikey)
         # Insert the data from csv to table
         fill_financial_data(connection, cursor, "IBM", two_weeks_ago)
         fill_financial_data(connection, cursor, "AAPL", two_weeks_ago)
