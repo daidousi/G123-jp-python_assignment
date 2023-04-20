@@ -1,3 +1,112 @@
+Project Description :
+
+This project is created to perform the functions that descripted in requirement.
+
+There are two main programs is included in this project, get_raw_data.py and run.py.
+
+The first program is used to process below items :
+
+1. Create the local database and corresponding table if it doesn't exist.
+2. Decrypt the AlphaVantage API Key from key files.
+3. Use AlphaVantage free API to retrieve the financial data of two stocks (IBM, Apple Inc.) for the most recently two weeks.
+4. Create a csv file to store the financial data received from step 1.
+5. Process the data in csv file and insert into the table of local database. Duplicated records will not be inserted and only the most recently two weeks data will be stored in database.
+
+The second program is used to support below functions :
+
+1. home page :
+	1.1. Show the usage of this API server.
+2. api/financial_data :
+	2.1. According to the given parameters to query the data from local databse and return the data.
+	2.2. Display the page information about the data and the data in current page.
+	2.3. Display the error infomation during processing phase.
+	2.4. API Parameters :
+		2.4.1. Optional : start_date
+				The first date condition for query database. Format should be YYYY-MM-DD. For example: 2023-04-20.
+		2.4.2. Optional : end_date
+				The last date condition for query database. Format should be YYYY-MM-DD. For example: 2023-04-20.
+		2.4.3. Optional : symbol
+				The symbol condition for query database. The following values are supported: "IBM", "Apple Inc.".
+		2.4.4. Optional : limit
+				The data count displayed in one page. The value should large than 1.
+		2.4.5. Optional : page
+				The current data page to display. The value should large than 1.
+	2.5. Example :
+		http://localhost:5000/api/financial_data?start_date=2023-04-15&end_date=2023-04-30&symbol=IBM&limit=3&page=2    
+3. api/statistics :
+	3.1. According to the given parameters to query the data from local databse and calculate the statistical data.
+	3.2. Display the statistical data.
+	3.3. Display the error infomation during processing phase.
+	3.4. API Parameters :
+		3.4.1. Required : start_date
+				The first date condition for query database. Format should be YYYY-MM-DD. For example: 2023-04-20.
+		3.4.2. Required : end_date
+				The last date condition for query database. Format should be YYYY-MM-DD. For example: 2023-04-20.
+		3.4.3. Required : symbol
+				The symbol condition for query database. The following values are supported: "IBM", "Apple Inc.".
+	3.5. Example :
+		http://localhost:5000/api/statistics?start_date=2023-04-01&end_date=2023-04-30&symbol=IBM
+
+================================================================================================================================================================================================================================================
+Tech Stack :
+
+1. encryptAPIKEY.py and decryptAPIKEY.py :
+	1.1. The cryptography library is used to encrypt/decrypt the key.
+	1.2. The os library is used to control the file and folder.
+	1.3. The program will generate the key files by asking user to input the key first on screen.
+
+2. get_raw_data.py :
+	2.1. The sqlite3 library is used to manage the local database.
+	2.2. The pandas library is used to manage data read from csv file.
+	2.3. The requests library is used to get the data from url.
+	2.4. The datetime library is used to get the current date for process.
+	2.5. The decryptAPIKEY library is used to decrypt the key.
+	2.6. The os library is used to control the file and folder.
+	2.7. The program will create the local database and corresponding table if it doesn't exist.
+	2.8. The program will store the data received from AlphaVantage as csv file and process it to get the useful data.
+	2.9. The program will store the processed data into database.
+	2.10 A query command with given date and symbol will be processed to check if the data already exist.
+
+3. run.py :
+	3.1. The flask library is used to manage the app.
+	3.2. The datetime library is used to check the format of input date parameter.
+	3.3. The sqlite3 library is used to manage the local database.
+	3.4. The program will check all the format of input parameters.
+	3.5. If the format of parameters is wrong or value is unavailable, it will assign it as default value.
+	3.6. When all the required parameters are given with correct format and value, it will build up the query command and get data from database.
+
+================================================================================================================================================================================================================================================
+How to Start :
+
+Please execute the command under project path with the following steps to start the project :
+
+1. pip install -r requirements.txt
+2. python3 encryptAPIKEY.py
+3. sudo docker-compose up
+
+Or if no docker is used :
+
+1. pip install -r requirements.txt
+2. python3 encryptAPIKEY.py
+3. python3 get_raw_data.py
+4. python3 financial/run.py
+
+================================================================================================================================================================================================================================================
+API Key Management :
+
+To secure the API Key to retrieve the data from AlphaVantage, the cryptography library is used to encrypt and decrypt the API Key.
+
+User should use the command "python3 encryptAPIKEY.py" to create two encrypted key files by input the API Key in screen.
+
+The two encrypted files will be included into the docker image for API server to update the local database inside image.
+
+User can also use the two encrypted files in local envirenment to retrieve the data into local database.
+
+No clear text API Key will be stored in any file.
+
+================================================================================================================================================================================================================================================
+Requirement :
+
 # Take-Home Assignment
 
 The goal of this take-home assignment is to evaluate your abilities to use API, data processing and transformation, SQL, and implement a new API service in Python.
