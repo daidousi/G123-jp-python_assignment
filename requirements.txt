@@ -2,7 +2,5 @@ flask
 pandas
 numpy
 requests
-sqlite3
 datetime
 cryptography
-os
