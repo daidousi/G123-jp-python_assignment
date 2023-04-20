@@ -1,0 +1,9 @@
+# yaml configuration
+version: '3'
+services:
+  webapi:
+    build: .
+    image: financial
+    ports:
+     - "5000:5000"
+    container_name: financial
